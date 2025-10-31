@@ -1,0 +1,16 @@
+### Basic ###
+# IDE
+.idea/
+*.iml
+
+# System files
+.DS_Store
+
+# Build directories
+target/
+bin/
+
+# Environment variables
+.env
+.env.*
+!.env.example
