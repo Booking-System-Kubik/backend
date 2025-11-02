@@ -33,7 +33,7 @@ public class SecurityConfig {
 
                         // Admin endpoints with roles
                         .requestMatchers("/api/admin/work-space/**").hasRole("ADMIN_WORKSPACE")
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN_PROJECT")
+                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN_PROJECT", "ADMIN_WORKSPACE")
 
                         // Others require auth
                         .anyRequest().authenticated()

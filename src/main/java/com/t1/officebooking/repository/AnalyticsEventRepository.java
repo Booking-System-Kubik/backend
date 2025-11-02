@@ -28,6 +28,22 @@ public interface AnalyticsEventRepository extends JpaRepository<AnalyticsEvent, 
     @Query("SELECT e FROM AnalyticsEvent e " +
             "JOIN FETCH e.user " +
             "JOIN FETCH e.space s " +
+            "JOIN FETCH s.location l " +
+            "JOIN FETCH s.spaceType " +
+            "LEFT JOIN FETCH e.department " +
+            "LEFT JOIN FETCH e.legalEntity " +
+            "WHERE l.organization.id = :organizationId " +
+            "AND e.eventTimeStamp >= :startTime " +
+            "AND e.eventTimeStamp <= :endTime")
+    List<AnalyticsEvent> findBookingsByOrganizationAndDates(
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
+            @Param("organizationId") Long organizationId
+    );
+
+    @Query("SELECT e FROM AnalyticsEvent e " +
+            "JOIN FETCH e.user " +
+            "JOIN FETCH e.space s " +
             "JOIN FETCH s.location " +
             "JOIN FETCH s.spaceType " +
             "LEFT JOIN FETCH e.department " +
@@ -57,6 +73,20 @@ public interface AnalyticsEventRepository extends JpaRepository<AnalyticsEvent, 
     @Query("SELECT e.location.city as locationCity, e.location.name as locationName, " +
             "e.space.id as spaceId, COUNT(e) as bookingCount " +
             "FROM AnalyticsEvent e " +
+            "JOIN e.location l " +
+            "WHERE l.organization.id = :organizationId " +
+            "AND e.eventTimeStamp >= :startTime " +
+            "AND e.eventTimeStamp <= :endTime " +
+            "GROUP BY e.location.city, e.location.name, e.space.id")
+    List<SpaceBookingStats> findSpaceBookingStatsByOrganization(
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
+            @Param("organizationId") Long organizationId
+    );
+
+    @Query("SELECT e.location.city as locationCity, e.location.name as locationName, " +
+            "e.space.id as spaceId, COUNT(e) as bookingCount " +
+            "FROM AnalyticsEvent e " +
             "WHERE e.eventTimeStamp >= :startTime " +
             "AND e.eventTimeStamp <= :endTime " +
             "GROUP BY e.location.city, e.location.name, e.space.id")
@@ -75,6 +105,19 @@ public interface AnalyticsEventRepository extends JpaRepository<AnalyticsEvent, 
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime,
             @Param("locationId") Long locationId
+    );
+
+    @Query("SELECT e.location.city as locationCity, e.location.name as locationName, " +
+            "COUNT(e) as bookingCount " +
+            "FROM AnalyticsEvent e " +
+            "JOIN e.location l " +
+            "WHERE l.organization.id = :organizationId " +
+            "AND e.eventTimeStamp BETWEEN :startTime AND :endTime " +
+            "GROUP BY e.location.city, e.location.name")
+    List<OfficeBookingStats> findAllLocationsBookingStatsByOrganization(
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
+            @Param("organizationId") Long organizationId
     );
 
     @Query("SELECT e.location.city as locationCity, e.location.name as locationName, " +

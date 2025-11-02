@@ -3,7 +3,10 @@ package com.t1.officebooking.service;
 import com.t1.officebooking.dto.request.ReportRequest;
 import com.t1.officebooking.dto.stats.OfficeBookingStats;
 import com.t1.officebooking.dto.stats.SpaceBookingStats;
+import com.t1.officebooking.exception.AdminAuthorityAbusingException;
 import com.t1.officebooking.model.AnalyticsEvent;
+import com.t1.officebooking.model.Location;
+import com.t1.officebooking.model.User;
 import com.t1.officebooking.model.event.BookingEvent;
 import com.t1.officebooking.repository.AnalyticsEventRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -45,13 +48,20 @@ public class AnalyticsReportService {
                     findBookingsByLocationAndDates(dbStart, dbEnd, locationId);
         }
         else {
+            User admin = userService.findById(adminId);
+            Long organizationId = admin.getOrganization().getId();
+            
             if (locationOfRequest != null) {
+                Location location = locationService.findById(locationOfRequest);
+                if (!location.getOrganization().getId().equals(organizationId)) {
+                    throw new AdminAuthorityAbusingException("Location does not belong to your organization");
+                }
                 validateLocation(locationOfRequest);
                 events = analyticsEventRepository
                         .findBookingsByLocationAndDates(dbStart, dbEnd, locationOfRequest);
             }
             else {
-                events = analyticsEventRepository.findAllBookingsBetweenDates(dbStart, dbEnd);
+                events = analyticsEventRepository.findBookingsByOrganizationAndDates(dbStart, dbEnd, organizationId);
             }
         }
 
@@ -97,11 +107,18 @@ public class AnalyticsReportService {
             Long locationId = userService.findById(adminId).getLocation().getId();
             stats = analyticsEventRepository.findSpaceBookingStatsByLocation(dbStart, dbEnd, locationId);
         } else {
+            User admin = userService.findById(adminId);
+            Long organizationId = admin.getOrganization().getId();
+            
             if (locationOfRequest != null) {
+                Location location = locationService.findById(locationOfRequest);
+                if (!location.getOrganization().getId().equals(organizationId)) {
+                    throw new AdminAuthorityAbusingException("Location does not belong to your organization");
+                }
                 validateLocation(locationOfRequest);
                 stats = analyticsEventRepository.findSpaceBookingStatsByLocation(dbStart, dbEnd, locationOfRequest);
             } else {
-                stats = analyticsEventRepository.findSpaceBookingStats(dbStart, dbEnd);
+                stats = analyticsEventRepository.findSpaceBookingStatsByOrganization(dbStart, dbEnd, organizationId);
             }
 
         }
@@ -144,11 +161,18 @@ public class AnalyticsReportService {
             Long locationId = userService.findById(adminId).getLocation().getId();
             stats = List.of(analyticsEventRepository.findLocationBookingStats(dbStart, dbEnd, locationId));
         } else {
+            User admin = userService.findById(adminId);
+            Long organizationId = admin.getOrganization().getId();
+            
             if (locationOfRequest != null) {
+                Location location = locationService.findById(locationOfRequest);
+                if (!location.getOrganization().getId().equals(organizationId)) {
+                    throw new AdminAuthorityAbusingException("Location does not belong to your organization");
+                }
                 validateLocation(locationOfRequest);
                 stats = List.of(analyticsEventRepository.findLocationBookingStats(dbStart, dbEnd, locationOfRequest));
             } else {
-                stats = analyticsEventRepository.findAllLocationsBookingStats(dbStart, dbEnd);
+                stats = analyticsEventRepository.findAllLocationsBookingStatsByOrganization(dbStart, dbEnd, organizationId);
             }
         }
 

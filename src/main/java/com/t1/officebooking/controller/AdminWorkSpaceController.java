@@ -6,6 +6,7 @@ import com.t1.officebooking.dto.response.BookingResponse;
 import com.t1.officebooking.dto.request.CreatingLocationRequest;
 import com.t1.officebooking.dto.request.CreatingSpaceRequest;
 import com.t1.officebooking.dto.request.CreatingSpaceTypeRequest;
+import com.t1.officebooking.exception.AdminAuthorityAbusingException;
 import com.t1.officebooking.model.Location;
 import com.t1.officebooking.model.Space;
 import com.t1.officebooking.model.SpaceType;
@@ -38,14 +39,27 @@ public class AdminWorkSpaceController {
 
     @PostMapping("/create-location")
     public ResponseEntity<Location> createLocation(
-            @RequestBody @Valid CreatingLocationRequest request) {
+            @RequestBody @Valid CreatingLocationRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        UUID adminId = UUID.fromString(userDetails.getUserId());
+        Long adminOrgId = userService.findById(adminId).getOrganization().getId();
+        if (!request.getOrganizationId().equals(adminOrgId)) {
+            throw new AdminAuthorityAbusingException("Cannot create location for another organization");
+        }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(locationService.addLocation(request));
     }
 
     @PostMapping("/create-space")
     public ResponseEntity<Space> createSpace(
-            @RequestBody @Valid CreatingSpaceRequest request) {
+            @RequestBody @Valid CreatingSpaceRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        UUID adminId = UUID.fromString(userDetails.getUserId());
+        Long adminOrgId = userService.findById(adminId).getOrganization().getId();
+        Location location = locationService.findById(request.getLocationId());
+        if (!location.getOrganization().getId().equals(adminOrgId)) {
+            throw new AdminAuthorityAbusingException("Location does not belong to your organization");
+        }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(spaceService.addSpace(request));
     }
@@ -61,6 +75,12 @@ public class AdminWorkSpaceController {
     public ResponseEntity<List<BookingResponse>> getAllActiveBookingsByLocation(
             @PathVariable Long locationId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        UUID adminId = UUID.fromString(userDetails.getUserId());
+        Long adminOrgId = userService.findById(adminId).getOrganization().getId();
+        Location location = locationService.findById(locationId);
+        if (!location.getOrganization().getId().equals(adminOrgId)) {
+            throw new AdminAuthorityAbusingException("Location does not belong to your organization");
+        }
         return ResponseEntity.ok()
                 .body(bookingService.findActiveBookingsByLocation(locationId));
     }
@@ -69,6 +89,12 @@ public class AdminWorkSpaceController {
     public ResponseEntity<List<UserDataResponse>> getAllUsersByLocation(
             @PathVariable Long locationId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        UUID adminId = UUID.fromString(userDetails.getUserId());
+        Long adminOrgId = userService.findById(adminId).getOrganization().getId();
+        Location location = locationService.findById(locationId);
+        if (!location.getOrganization().getId().equals(adminOrgId)) {
+            throw new AdminAuthorityAbusingException("Location does not belong to your organization");
+        }
         return ResponseEntity.ok().body(userService.findUsersByLocation(locationId));
     }
 

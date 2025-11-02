@@ -50,6 +50,14 @@ public class BookingService {
             throw new AdminAuthorityAbusingException("Doing Actions on Bookings " +
                     "from another office is forbidden");
 
+        // Workspace Admin: check organization
+        if (!isProjectAdmin) {
+            if (!booking.getSpace().getLocation().getOrganization().getId().equals(admin.getOrganization().getId())) {
+                throw new AdminAuthorityAbusingException("Doing Actions on Bookings " +
+                        "from another organization is forbidden");
+            }
+        }
+
         booking.setStatus("CANCELLED");
 
         bookingRepository.save(booking);
@@ -113,6 +121,14 @@ public class BookingService {
         if (isProjectAdmin && !space.getLocation().equals(admin.getLocation()))
             throw new AdminAuthorityAbusingException("Project admin cant book space for employee outside his location");
 
+        // Workspace Admin: check organization
+        if (!isProjectAdmin) {
+            if (userService.isUserNotFromAdminOrganization(user, adminId))
+                throw new AdminAuthorityAbusingException("Workspace admin cant book space for employee from another organization");
+            if (!space.getLocation().getOrganization().getId().equals(admin.getOrganization().getId()))
+                throw new AdminAuthorityAbusingException("Workspace admin cant book space outside his organization");
+        }
+
         validateBookingRequest(new BookingRequest(request), space, userIsNotAdmin, user.getId());
 
         Long bookingId =  bookingRepository.createBookingIfAvailable(
@@ -144,7 +160,9 @@ public class BookingService {
             return bookingRepository.findActiveBookingsByLocation(admin.getLocation().getId(),
                             LocalDateTime.now(ZoneOffset.UTC))
                     .stream().map(bookingMapper).toList();
-        return bookingRepository.findActiveBookings(LocalDateTime.now(ZoneOffset.UTC))
+        return bookingRepository.findActiveBookingsByOrganization(
+                admin.getOrganization().getId(),
+                LocalDateTime.now(ZoneOffset.UTC))
                 .stream().map(bookingMapper).toList();
     }
 
@@ -164,6 +182,7 @@ public class BookingService {
             String userEmail, UUID adminId,
             Boolean isProjectAdmin, Boolean onlyActiveBookings) {
         User user = userService.findByEmail(userEmail);
+        User admin = userService.findById(adminId);
 
         if (isProjectAdmin && userService.isUserNotFromAdminLocation(user.getLocation(), adminId))
             throw new AdminAuthorityAbusingException("Doing Actions on employees " +
@@ -184,6 +203,11 @@ public class BookingService {
                     .stream().map(bookingMapper).toList();
 
         }
+
+        // Workspace Admin: check organization
+        if (userService.isUserNotFromAdminOrganization(user, adminId))
+            throw new AdminAuthorityAbusingException("Doing Actions on employees " +
+                    "of another organization is forbidden");
 
         if (onlyActiveBookings)
             return bookingRepository.findActiveBookingsByUserId(

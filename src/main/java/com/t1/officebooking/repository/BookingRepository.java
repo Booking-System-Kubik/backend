@@ -148,6 +148,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("currentTime") LocalDateTime currentTime
     );
 
+    @Query("SELECT b FROM Booking b " +
+            "JOIN FETCH b.user " +
+            "JOIN FETCH b.space s " +
+            "JOIN FETCH s.location l " +
+            "JOIN FETCH s.spaceType " +
+            "WHERE l.organization.id = :organizationId " +
+            "AND b.end > :currentTime")
+    List<Booking> findActiveBookingsByOrganization(
+            @Param("organizationId") Long organizationId,
+            @Param("currentTime") LocalDateTime currentTime
+    );
+
     @Query("""
     SELECT b FROM Booking b
     LEFT JOIN FETCH b.user u

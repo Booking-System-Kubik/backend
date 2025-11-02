@@ -39,6 +39,11 @@ public class UserService {
             throw new AdminAuthorityAbusingException("Doing Actions on employees " +
                     "of another department is forbidden");
 
+        // Workspace Admin: check organization
+        if (!isProjectAdmin && isUserNotFromAdminOrganization(user, adminId))
+            throw new AdminAuthorityAbusingException("Doing Actions on employees " +
+                    "of another organization is forbidden");
+
         if (request.getRole().equals(UserRole.ROLE_ADMIN_WORKSPACE)) {
             user.addRole(UserRole.ROLE_ADMIN_PROJECT);
         }
@@ -60,6 +65,11 @@ public class UserService {
             throw new AdminAuthorityAbusingException("Doing Actions on employees " +
                 "of another department is forbidden");
 
+        // Workspace Admin: check organization
+        if (!isProjectAdmin && isUserNotFromAdminOrganization(user, adminId))
+            throw new AdminAuthorityAbusingException("Doing Actions on employees " +
+                    "of another organization is forbidden");
+
         if (request.getRole().equals(UserRole.ROLE_ADMIN_PROJECT))
             user.removeRole(UserRole.ROLE_ADMIN_WORKSPACE);
 
@@ -75,6 +85,16 @@ public class UserService {
         if (userLocation == null)
             return true;
         return !userLocation.equals(admin.getLocation());
+    }
+
+    @Transactional
+    public boolean isUserNotFromAdminOrganization(User user, UUID adminId) {
+        User admin = userRepository.findById(adminId)
+                .orElseThrow(() -> new EntityNotFoundException("Cant find your admin account"));
+
+        if (user.getOrganization() == null || admin.getOrganization() == null)
+            return true;
+        return !user.getOrganization().getId().equals(admin.getOrganization().getId());
     }
 
     @Transactional
@@ -106,7 +126,7 @@ public class UserService {
 
         List<User> users = isProjectAdmin
                 ? userRepository.findByLocation(admin.getLocation().getId())
-                : userRepository.findAllWithDetails();
+                : userRepository.findByOrganization(admin.getOrganization().getId());
 
         return users.stream().map(UserDataResponse::new).toList();
     }

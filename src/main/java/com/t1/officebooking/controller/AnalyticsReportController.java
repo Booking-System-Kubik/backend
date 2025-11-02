@@ -38,12 +38,13 @@ public class AnalyticsReportController {
     @PostMapping("/analytics/location/{locationId}/csv")
     public ResponseEntity<byte[]> getBaseReportByLocationAsCsv(
             @PathVariable Long locationId,
-            @RequestBody @Valid ReportRequest request) {
+            @RequestBody @Valid ReportRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         byte[] csvBytes = reportService.generateBaseReport(
                 request,
                 false,
-                null,
+                UUID.fromString(userDetails.getUserId()),
                 locationId);
 
         return getResponseWithCsvBody(csvBytes);
@@ -69,12 +70,13 @@ public class AnalyticsReportController {
     @PostMapping("/analytics/location/{locationId}/space-load/csv")
     public ResponseEntity<byte[]> getSpaceLoadReportByLocationAsCsv(
             @PathVariable Long locationId,
-            @RequestBody @Valid ReportRequest request) {
+            @RequestBody @Valid ReportRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         byte[] csvBytes = reportService.generateSpaceUsageReport(
                 request,
                 false,
-                null,
+                UUID.fromString(userDetails.getUserId()),
                 locationId
         );
 
@@ -101,12 +103,13 @@ public class AnalyticsReportController {
     @PostMapping("/analytics/location/{locationId}/location-load/csv")
     public ResponseEntity<byte[]> getLocationLoadReportByLocationAsCsv(
             @PathVariable Long locationId,
-            @RequestBody @Valid ReportRequest request) {
+            @RequestBody @Valid ReportRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         byte[] csvBytes = reportService.generateLocationLoadReport(
                 request,
                 false,
-                null,
+                UUID.fromString(userDetails.getUserId()),
                 locationId
         );
 
