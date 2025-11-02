@@ -45,12 +45,8 @@ JWT_ACCESS_EXPIRATION_MIN=60
 JWT_REFRESH_EXPIRATION_DAYS=7
 ```
 
-2)
-```bash
-mvn clean install
-```
 
-3)
+2)
 ```bash
 docker-compose up --build -d
 ```
