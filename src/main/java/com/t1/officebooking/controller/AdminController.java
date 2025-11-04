@@ -120,6 +120,20 @@ public class AdminController {
                 isProjectAdmin(userDetails)));
     }
 
+    @DeleteMapping("/users")
+    public void removeUserFromOrganization(
+            @RequestParam
+            @NotBlank(message = "Email cannot be blank")
+            @Email(message = "Email should be valid")
+            String email,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.removeUserFromOrganization(
+                email,
+                isProjectAdmin(userDetails),
+                UUID.fromString(userDetails.getUserId())
+        );
+    }
+
     private boolean isProjectAdmin(CustomUserDetails userDetails) {
         return !userDetails.getRoles().contains(UserRole.ROLE_ADMIN_WORKSPACE);
     }

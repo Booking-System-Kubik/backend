@@ -111,6 +111,13 @@ public class UserService {
                         ("User with provided email does not exist"));
     }
 
+    @Transactional
+    public User findByEmailWithDetails(String email) {
+        return userRepository.findByEmailWithDetails(email)
+                .orElseThrow(() -> new EntityNotFoundException
+                        ("User with provided email does not exist"));
+    }
+
     public boolean existsByEmail(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
@@ -140,5 +147,31 @@ public class UserService {
     public List<UserDataResponse> findUsersByLocation(Long locationId) {
         return userRepository.findByLocation(locationId)
                 .stream().map(UserDataResponse::new).toList();
+    }
+
+    @Transactional
+    public void removeUserFromOrganization(String email, Boolean isProjectAdmin, UUID adminId) {
+        User user = findByEmailWithDetails(email);
+
+        // Project Admin cannot remove Workspace Admin
+        if (isProjectAdmin && user.getRoles().contains(UserRole.ROLE_ADMIN_WORKSPACE)) {
+            throw new RoleAssignmentViolationException
+                    ("Project Admin cannot remove Workspace Admin from organization");
+        }
+
+        // Project Admin: check location
+        if (isProjectAdmin && isUserNotFromAdminLocation(user.getLocation(), adminId)) {
+            throw new AdminAuthorityAbusingException("Doing Actions on employees " +
+                    "of another location is forbidden");
+        }
+
+        // Workspace Admin: check organization
+        if (!isProjectAdmin && isUserNotFromAdminOrganization(user, adminId)) {
+            throw new AdminAuthorityAbusingException("Doing Actions on employees " +
+                    "of another organization is forbidden");
+        }
+
+        // Delete user completely from database
+        userRepository.delete(user);
     }
 }
