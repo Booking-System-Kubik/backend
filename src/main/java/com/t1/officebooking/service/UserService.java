@@ -99,7 +99,8 @@ public class UserService {
 
     @Transactional
     public UserDataResponse getUserData(UUID userId) {
-        User user = findById(userId);
+        User user = userRepository.findByIdWithDetails(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User must exist"));
 
         return new UserDataResponse(user);
     }

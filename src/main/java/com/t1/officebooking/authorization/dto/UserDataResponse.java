@@ -13,6 +13,8 @@ public class UserDataResponse {
     private String fullName;
     private Long locationId;
     private String locationName;
+    private Long organizationId;
+    private String organizationName;
     private Set<UserRole> roles;
 
     public UserDataResponse(User user) {
@@ -24,6 +26,12 @@ public class UserDataResponse {
                 :null;
         this.locationId = (user.getLocation() != null)
                 ? user.getLocation().getId()
+                :null;
+        this.organizationId = (user.getOrganization() != null)
+                ? user.getOrganization().getId()
+                :null;
+        this.organizationName = (user.getOrganization() != null)
+                ? user.getOrganization().getName()
                 :null;
     }
 }

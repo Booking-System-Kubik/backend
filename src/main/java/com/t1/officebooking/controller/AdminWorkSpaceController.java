@@ -38,7 +38,7 @@ public class AdminWorkSpaceController {
     private final PendingRegistrationService pendingRegistrationService;
 
     @PostMapping("/create-location")
-    public ResponseEntity<Location> createLocation(
+    public ResponseEntity<Long> createLocation(
             @RequestBody @Valid CreatingLocationRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         UUID adminId = UUID.fromString(userDetails.getUserId());
@@ -47,7 +47,7 @@ public class AdminWorkSpaceController {
             throw new AdminAuthorityAbusingException("Cannot create location for another organization");
         }
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(locationService.addLocation(request));
+                .body(locationService.addLocation(request).getId());
     }
 
     @PostMapping("/create-space")

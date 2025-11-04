@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 import java.util.Map;
-
 @RestControllerAdvice
 @Order(Ordered.LOWEST_PRECEDENCE)
 public class AuthorizationExceptionHandler {
