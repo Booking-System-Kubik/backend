@@ -45,8 +45,9 @@ public class LocationService {
         return locationRepository.findAll();
     }
 
+    @Transactional
     public List<Location> getLocationsByOrganization(Long organizationId) {
-        return locationRepository.findByOrganization_Id(organizationId);
+        return locationRepository.findByOrganizationIdWithDetails(organizationId);
     }
 
     public Location findById(Long id) {
