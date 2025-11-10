@@ -10,5 +10,5 @@ public class FilteringSpacesRequest {
     @NotNull
     private Long spaceTypeId;
 
-    private Integer floor;
+    private Integer floorNumber;
 }

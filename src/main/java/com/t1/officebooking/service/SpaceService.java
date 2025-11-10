@@ -4,10 +4,12 @@ import com.t1.officebooking.dto.request.CreatingSpaceRequest;
 import com.t1.officebooking.dto.request.CreatingSpaceTypeRequest;
 import com.t1.officebooking.dto.request.CreatingFloorSpacesRequest;
 import com.t1.officebooking.dto.request.FilteringSpacesRequest;
+import com.t1.officebooking.model.Floor;
 import com.t1.officebooking.model.Location;
 import com.t1.officebooking.model.Bounds;
 import com.t1.officebooking.model.Space;
 import com.t1.officebooking.model.SpaceType;
+import com.t1.officebooking.repository.FloorRepository;
 import com.t1.officebooking.repository.SpaceRepository;
 import com.t1.officebooking.repository.SpaceTypeRepository;
 import jakarta.persistence.EntityExistsException;
@@ -23,22 +25,24 @@ import java.util.List;
 public class SpaceService {
     private final SpaceTypeRepository spaceTypeRepository;
     private final SpaceRepository spaceRepository;
+    private final FloorRepository floorRepository;
     private final LocationService locationService;
 
     public List<Space> getFilteredSpaces(FilteringSpacesRequest request) {
-        if (request.getFloor() == null)
+        if (request.getFloorNumber() == null)
             return spaceRepository
                     .findByLocationIdAndSpaceTypeId(request.getLocationId(), request.getSpaceTypeId());
         return spaceRepository
                 .findByLocationIdAndSpaceTypeIdAndFloor(
-                        request.getLocationId(), request.getSpaceTypeId(), request.getFloor());
+                        request.getLocationId(), request.getSpaceTypeId(), request.getFloorNumber());
     }
 
     @Transactional
     public Space addSpace(CreatingSpaceRequest request) {
         Location location = locationService.findById(request.getLocationId());
         SpaceType spaceType = findSpaceTypeById(request.getSpaceTypeId());
-        Space space = new Space(location, spaceType, request.getCapacity(), request.getFloor());
+        Floor floor = findOrCreateFloor(location.getId(), request.getFloorNumber(), null, null);
+        Space space = new Space(location, spaceType, request.getCapacity(), floor);
         if (request.getX() != null && request.getY() != null && request.getWidth() != null && request.getHeight() != null) {
             space.setBounds(new Bounds(request.getX(), request.getY(), request.getWidth(), request.getHeight()));
         }
@@ -78,11 +82,13 @@ public class SpaceService {
     @Transactional
     public List<Space> addSpacesByFloor(CreatingFloorSpacesRequest request) {
         Location location = locationService.findById(request.getLocationId());
+        Floor floor = findOrCreateFloor(request.getLocationId(), request.getFloorNumber(), 
+                request.getWidth(), request.getHeight());
         
         return request.getSpaces().stream()
                 .map(spaceRequest -> {
                     SpaceType spaceType = findSpaceTypeById(spaceRequest.getSpaceTypeId());
-                    Space space = new Space(location, spaceType, spaceRequest.getCapacity(), request.getFloor());
+                    Space space = new Space(location, spaceType, spaceRequest.getCapacity(), floor);
                     if (spaceRequest.getX() != null && spaceRequest.getY() != null 
                             && spaceRequest.getWidth() != null && spaceRequest.getHeight() != null) {
                         space.setBounds(new Bounds(spaceRequest.getX(), spaceRequest.getY(), 
@@ -93,7 +99,20 @@ public class SpaceService {
                 .toList();
     }
 
-    public List<Space> getSpacesByLocationAndFloor(Long locationId, Integer floor) {
-        return spaceRepository.findByLocationIdAndFloor(locationId, floor);
+    @Transactional
+    public Floor findOrCreateFloor(Long locationId, Integer floorNumber, Integer width, Integer height) {
+        return floorRepository.findByLocationIdAndFloorNumber(locationId, floorNumber)
+                .orElseGet(() -> {
+                    Location location = locationService.findById(locationId);
+                    if (width == null || height == null) {
+                        throw new EntityNotFoundException("Floor dimensions are required for new floor");
+                    }
+                    Floor floor = new Floor(location, floorNumber, width, height);
+                    return floorRepository.save(floor);
+                });
+    }
+
+    public List<Space> getSpacesByLocationAndFloor(Long locationId, Integer floorNumber) {
+        return spaceRepository.findByLocationIdAndFloorNumber(locationId, floorNumber);
     }
 }

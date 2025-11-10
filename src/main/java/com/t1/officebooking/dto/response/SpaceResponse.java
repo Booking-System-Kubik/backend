@@ -9,12 +9,15 @@ public record SpaceResponse(
         Long spaceTypeId,
         String spaceType,
         Integer capacity,
-        Integer floor,
+        FloorResponse floor,
         Boolean bookable,
         BoundsResponse bounds
 ) {
     @Builder
     public record BoundsResponse(Integer x, Integer y, Integer width, Integer height) { }
+    
+    @Builder
+    public record FloorResponse(Long id, Integer floorNumber, Integer width, Integer height) { }
 }
 
 

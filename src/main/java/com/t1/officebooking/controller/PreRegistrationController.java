@@ -1,5 +1,6 @@
 package com.t1.officebooking.controller;
 
+import com.t1.officebooking.dto.response.FloorSpacesResponse;
 import com.t1.officebooking.dto.response.SpaceResponse;
 import com.t1.officebooking.model.Location;
 import com.t1.officebooking.model.Organization;
@@ -41,14 +42,30 @@ public class PreRegistrationController {
 
     // Get spaces by location and floor
     @GetMapping("/locations/{locationId}/spaces")
-    public ResponseEntity<List<SpaceResponse>> getSpacesByLocationAndFloor(
+    public ResponseEntity<FloorSpacesResponse> getSpacesByLocationAndFloor(
             @PathVariable Long locationId,
-            @RequestParam Integer floor) {
+            @RequestParam Integer floorNumber) {
+        List<SpaceResponse> spaces = spaceService.getSpacesByLocationAndFloor(locationId, floorNumber)
+                .stream()
+                .map(spaceMapper)
+                .toList();
+        
+        FloorSpacesResponse.FloorResponse floorResponse = null;
+        if (!spaces.isEmpty() && spaces.get(0).floor() != null) {
+            SpaceResponse.FloorResponse firstFloor = spaces.get(0).floor();
+            floorResponse = FloorSpacesResponse.FloorResponse.builder()
+                    .id(firstFloor.id())
+                    .floorNumber(firstFloor.floorNumber())
+                    .width(firstFloor.width())
+                    .height(firstFloor.height())
+                    .build();
+        }
+        
         return ResponseEntity.ok().body(
-                spaceService.getSpacesByLocationAndFloor(locationId, floor)
-                        .stream()
-                        .map(spaceMapper)
-                        .toList()
+                FloorSpacesResponse.builder()
+                        .floor(floorResponse)
+                        .spaces(spaces)
+                        .build()
         );
     }
 }

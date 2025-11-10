@@ -17,7 +17,7 @@ public class CreatingSpaceRequest {
     private Integer capacity;
 
     @NotNull
-    private Integer floor;
+    private Integer floorNumber;
 
     private Integer x;
     private Integer y;

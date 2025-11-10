@@ -23,18 +23,19 @@ public class Space {
     @JoinColumn(name = "space_type_id", nullable = false)
     private SpaceType spaceType;
 
-    @Column(nullable = false)
-    private int capacity;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "floor_id", nullable = false)
+    private Floor floor;
 
     @Column(nullable = false)
-    private int floor;
+    private int capacity;
 
     private boolean isBookable = true;
 
     @Embedded
     private Bounds bounds;
 
-    public Space(Location location, SpaceType spaceType, int capacity, int floor) {
+    public Space(Location location, SpaceType spaceType, int capacity, Floor floor) {
         this.location = location;
         this.spaceType = spaceType;
         this.capacity = capacity;

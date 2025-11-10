@@ -24,13 +24,23 @@ public class SpaceMapperFunction implements Function<Space, SpaceResponse> {
                     .build();
         }
 
+        SpaceResponse.FloorResponse floorResponse = null;
+        if (space.getFloor() != null) {
+            floorResponse = SpaceResponse.FloorResponse.builder()
+                    .id(space.getFloor().getId())
+                    .floorNumber(space.getFloor().getFloorNumber())
+                    .width(space.getFloor().getWidth())
+                    .height(space.getFloor().getHeight())
+                    .build();
+        }
+
         return SpaceResponse.builder()
                 .id(space.getId())
                 .locationId(space.getLocation().getId())
                 .spaceTypeId(space.getSpaceType().getId())
                 .spaceType(space.getSpaceType().getType())
                 .capacity(space.getCapacity())
-                .floor(space.getFloor())
+                .floor(floorResponse)
                 .bookable(space.isBookable())
                 .bounds(boundsResponse)
                 .build();
