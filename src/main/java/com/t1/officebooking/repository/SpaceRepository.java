@@ -27,4 +27,13 @@ public interface SpaceRepository extends JpaRepository<Space, Long> {
             @Param("locationId") Long locationId,
             @Param("spaceTypeId") Long spaceTypeId,
             @Param("floor") Integer floor);
+
+    @Query("SELECT s FROM Space s " +
+            "JOIN FETCH s.location " +
+            "JOIN FETCH s.spaceType " +
+            "WHERE s.location.id = :locationId " +
+            "AND s.floor = :floor")
+    List<Space> findByLocationIdAndFloor(
+            @Param("locationId") Long locationId,
+            @Param("floor") Integer floor);
 }

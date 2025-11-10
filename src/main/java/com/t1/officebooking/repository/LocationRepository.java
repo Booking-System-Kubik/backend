@@ -18,4 +18,9 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
             "JOIN FETCH l.organization " +
             "WHERE l.organization.id = :organizationId")
     List<Location> findByOrganizationIdWithDetails(@Param("organizationId") Long organizationId);
+
+    @Query("SELECT l FROM Location l " +
+            "JOIN FETCH l.organization " +
+            "WHERE l.id = :id")
+    java.util.Optional<Location> findByIdWithDetails(@Param("id") Long id);
 }

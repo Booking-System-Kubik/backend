@@ -1,9 +1,11 @@
 package com.t1.officebooking.service;
 
 import com.t1.officebooking.dto.request.CreatingLocationRequest;
+import com.t1.officebooking.exception.AdminAuthorityAbusingException;
 import com.t1.officebooking.model.Location;
 import com.t1.officebooking.model.Organization;
 import com.t1.officebooking.repository.LocationRepository;
+import com.t1.officebooking.service.UserService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -11,12 +13,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class LocationService {
     private final LocationRepository locationRepository;
     private final OrganizationService organizationService;
+    private final UserService userService;
 
     @Transactional
     public Location addLocation(CreatingLocationRequest request) {
@@ -57,5 +61,15 @@ public class LocationService {
 
     public Boolean locationExists(Long locationId) {
         return locationRepository.findById(locationId).isPresent();
+    }
+
+    @Transactional
+    public void validateLocationBelongsToAdminOrganization(Long locationId, UUID adminId) {
+        Location location = locationRepository.findByIdWithDetails(locationId)
+                .orElseThrow(() -> new EntityNotFoundException("Location must exist"));
+        Long adminOrgId = userService.findById(adminId).getOrganization().getId();
+        if (!location.getOrganization().getId().equals(adminOrgId)) {
+            throw new AdminAuthorityAbusingException("Location does not belong to your organization");
+        }
     }
 }

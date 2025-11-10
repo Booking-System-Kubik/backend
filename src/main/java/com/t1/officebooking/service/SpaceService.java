@@ -2,6 +2,7 @@ package com.t1.officebooking.service;
 
 import com.t1.officebooking.dto.request.CreatingSpaceRequest;
 import com.t1.officebooking.dto.request.CreatingSpaceTypeRequest;
+import com.t1.officebooking.dto.request.CreatingFloorSpacesRequest;
 import com.t1.officebooking.dto.request.FilteringSpacesRequest;
 import com.t1.officebooking.model.Location;
 import com.t1.officebooking.model.Bounds;
@@ -72,5 +73,27 @@ public class SpaceService {
     public SpaceType findSpaceTypeById(Long id) {
         return spaceTypeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Space Type must exist"));
+    }
+
+    @Transactional
+    public List<Space> addSpacesByFloor(CreatingFloorSpacesRequest request) {
+        Location location = locationService.findById(request.getLocationId());
+        
+        return request.getSpaces().stream()
+                .map(spaceRequest -> {
+                    SpaceType spaceType = findSpaceTypeById(spaceRequest.getSpaceTypeId());
+                    Space space = new Space(location, spaceType, spaceRequest.getCapacity(), request.getFloor());
+                    if (spaceRequest.getX() != null && spaceRequest.getY() != null 
+                            && spaceRequest.getWidth() != null && spaceRequest.getHeight() != null) {
+                        space.setBounds(new Bounds(spaceRequest.getX(), spaceRequest.getY(), 
+                                spaceRequest.getWidth(), spaceRequest.getHeight()));
+                    }
+                    return spaceRepository.save(space);
+                })
+                .toList();
+    }
+
+    public List<Space> getSpacesByLocationAndFloor(Long locationId, Integer floor) {
+        return spaceRepository.findByLocationIdAndFloor(locationId, floor);
     }
 }
