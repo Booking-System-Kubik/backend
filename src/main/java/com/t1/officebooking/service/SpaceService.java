@@ -41,7 +41,8 @@ public class SpaceService {
     public Space addSpace(CreatingSpaceRequest request) {
         Location location = locationService.findById(request.getLocationId());
         SpaceType spaceType = findSpaceTypeById(request.getSpaceTypeId());
-        Floor floor = findOrCreateFloor(location.getId(), request.getFloorNumber(), null, null);
+        Floor floor = floorRepository.findByLocationIdAndFloorNumber(location.getId(), request.getFloorNumber())
+                .orElseThrow(() -> new EntityNotFoundException("Floor does not exist for specified location and number"));
         Space space = new Space(location, spaceType, request.getCapacity(), floor);
         if (request.getX() != null && request.getY() != null && request.getWidth() != null && request.getHeight() != null) {
             space.setBounds(new Bounds(request.getX(), request.getY(), request.getWidth(), request.getHeight()));
@@ -82,8 +83,8 @@ public class SpaceService {
     @Transactional
     public List<Space> addSpacesByFloor(CreatingFloorSpacesRequest request) {
         Location location = locationService.findById(request.getLocationId());
-        Floor floor = findOrCreateFloor(request.getLocationId(), request.getFloorNumber(), 
-                request.getWidth(), request.getHeight());
+        Floor floor = findOrCreateFloor(request.getLocationId(), request.getFloorNumber(),
+                request.getPolygon());
         
         return request.getSpaces().stream()
                 .map(spaceRequest -> {
@@ -100,14 +101,17 @@ public class SpaceService {
     }
 
     @Transactional
-    public Floor findOrCreateFloor(Long locationId, Integer floorNumber, Integer width, Integer height) {
+    public Floor findOrCreateFloor(Long locationId, Integer floorNumber, java.util.List<com.t1.officebooking.dto.request.PointRequest> polygonRequest) {
         return floorRepository.findByLocationIdAndFloorNumber(locationId, floorNumber)
                 .orElseGet(() -> {
                     Location location = locationService.findById(locationId);
-                    if (width == null || height == null) {
-                        throw new EntityNotFoundException("Floor dimensions are required for new floor");
+                    if (polygonRequest == null || polygonRequest.isEmpty()) {
+                        throw new EntityNotFoundException("Floor polygon is required for new floor");
                     }
-                    Floor floor = new Floor(location, floorNumber, width, height);
+                    java.util.List<com.t1.officebooking.model.Point> polygon = polygonRequest.stream()
+                            .map(p -> new com.t1.officebooking.model.Point(p.getX(), p.getY()))
+                            .toList();
+                    Floor floor = new Floor(location, floorNumber, polygon);
                     return floorRepository.save(floor);
                 });
     }

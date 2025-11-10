@@ -56,8 +56,7 @@ public class PreRegistrationController {
             floorResponse = FloorSpacesResponse.FloorResponse.builder()
                     .id(firstFloor.id())
                     .floorNumber(firstFloor.floorNumber())
-                    .width(firstFloor.width())
-                    .height(firstFloor.height())
+                    .polygon(firstFloor.polygon())
                     .build();
         }
         

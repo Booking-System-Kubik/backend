@@ -10,6 +10,6 @@ public record FloorSpacesResponse(
         List<SpaceResponse> spaces
 ) {
     @Builder
-    public record FloorResponse(Long id, Integer floorNumber, Integer width, Integer height) { }
+    public record FloorResponse(Long id, Integer floorNumber, java.util.List<SpaceResponse.PointResponse> polygon) { }
 }
 

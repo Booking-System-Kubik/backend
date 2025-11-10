@@ -26,11 +26,16 @@ public class SpaceMapperFunction implements Function<Space, SpaceResponse> {
 
         SpaceResponse.FloorResponse floorResponse = null;
         if (space.getFloor() != null) {
+            java.util.List<SpaceResponse.PointResponse> polygon = null;
+            if (space.getFloor().getPolygon() != null) {
+                polygon = space.getFloor().getPolygon().stream()
+                        .map(p -> SpaceResponse.PointResponse.builder().x(p.getX()).y(p.getY()).build())
+                        .toList();
+            }
             floorResponse = SpaceResponse.FloorResponse.builder()
                     .id(space.getFloor().getId())
                     .floorNumber(space.getFloor().getFloorNumber())
-                    .width(space.getFloor().getWidth())
-                    .height(space.getFloor().getHeight())
+                    .polygon(polygon)
                     .build();
         }
 

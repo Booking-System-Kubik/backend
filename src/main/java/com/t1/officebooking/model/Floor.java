@@ -3,6 +3,8 @@ package com.t1.officebooking.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -22,17 +24,16 @@ public class Floor {
     @Column(name = "floor_number", nullable = false)
     private Integer floorNumber;
 
-    @Column(nullable = false)
-    private Integer width;
+    @ElementCollection
+    @CollectionTable(name = "floor_polygon", joinColumns = @JoinColumn(name = "floor_id"))
+    private List<Point> polygon = new ArrayList<>();
 
-    @Column(nullable = false)
-    private Integer height;
-
-    public Floor(Location location, Integer floorNumber, Integer width, Integer height) {
+    public Floor(Location location, Integer floorNumber, List<Point> polygon) {
         this.location = location;
         this.floorNumber = floorNumber;
-        this.width = width;
-        this.height = height;
+        if (polygon != null) {
+            this.polygon = polygon;
+        }
     }
 }
 

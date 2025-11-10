@@ -16,13 +16,9 @@ public class CreatingFloorSpacesRequest {
     @NotNull
     private Integer floorNumber;
 
-    @NotNull
-    @Min(value = 1)
-    private Integer width;
-
-    @NotNull
-    @Min(value = 1)
-    private Integer height;
+    @NotEmpty(message = "Floor polygon cannot be empty")
+    @Valid
+    private List<PointRequest> polygon;
 
     @NotEmpty(message = "Spaces list cannot be empty")
     @Valid

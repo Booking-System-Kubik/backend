@@ -17,7 +17,9 @@ public record SpaceResponse(
     public record BoundsResponse(Integer x, Integer y, Integer width, Integer height) { }
     
     @Builder
-    public record FloorResponse(Long id, Integer floorNumber, Integer width, Integer height) { }
+    public record FloorResponse(Long id, Integer floorNumber, java.util.List<PointResponse> polygon) { }
+    @Builder
+    public record PointResponse(Integer x, Integer y) { }
 }
 
 
