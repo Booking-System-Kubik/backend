@@ -70,7 +70,7 @@ public class PreRegistrationController {
     }
 
     @GetMapping("/locations/{locationId}/spacetypes")
-    public ResponseEntity<List<SpaceType>> getAllSpaceTypes(
+    public ResponseEntity<?> getAllSpaceTypes(
             @PathVariable Long locationId
     ) {
         return ResponseEntity.ok().body(spaceService.getAllSpaceTypes(locationId));

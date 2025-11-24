@@ -4,6 +4,7 @@ import com.t1.officebooking.dto.request.CreatingSpaceRequest;
 import com.t1.officebooking.dto.request.CreatingSpaceTypeRequest;
 import com.t1.officebooking.dto.request.CreatingFloorSpacesRequest;
 import com.t1.officebooking.dto.request.FilteringSpacesRequest;
+import com.t1.officebooking.dto.response.SpaceTypeResponse;
 import com.t1.officebooking.model.Floor;
 import com.t1.officebooking.model.Location;
 import com.t1.officebooking.model.Bounds;
@@ -65,9 +66,15 @@ public class SpaceService {
         spaceTypeRepository.save(spaceType);
     }
 
-    public List<SpaceType> getAllSpaceTypes(Long locationId) {
+    public List<SpaceTypeResponse> getAllSpaceTypes(Long locationId) {
         return spaceTypeRepository.findByLocation(
-                locationService.getReference(locationId));
+                locationService.getReference(locationId))
+                .stream()
+                .map(s -> SpaceTypeResponse.builder()
+                        .type(s.getType())
+                        .id(s.getId())
+                        .build())
+                .toList();
     }
 
     public boolean spaceTypeExists(SpaceType spaceType) {
