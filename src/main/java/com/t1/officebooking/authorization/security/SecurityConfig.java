@@ -28,8 +28,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/locations/{locationId}/spaces").permitAll()
-                        .requestMatchers("/api/organizations/*/locations").permitAll()
+                        .requestMatchers("/api/organizations/**").permitAll()
 
                         // Admin endpoints with roles
                         .requestMatchers("/api/admin/work-space/**").hasRole("ADMIN_WORKSPACE")
