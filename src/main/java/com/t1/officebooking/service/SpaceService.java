@@ -62,7 +62,7 @@ public class SpaceService {
 
         if (spaceTypeExists(spaceType))
             throw new EntityExistsException("Provided space type already exists");
-        return spaceTypeRepository.save(spaceType);
+        spaceTypeRepository.save(spaceType);
     }
 
     public List<SpaceType> getAllSpaceTypes(Long locationId) {
