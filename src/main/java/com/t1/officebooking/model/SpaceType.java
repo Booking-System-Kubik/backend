@@ -19,12 +19,17 @@ public class SpaceType {
     @Column(nullable = false, unique = true)
     private String type;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id")
+    private Location location;
+
     @Column(columnDefinition = "text[]")
     @JdbcTypeCode(SqlTypes.ARRAY)
     private List<String> allowedDurations;
 
-    public SpaceType(String type, List<String> allowedDurations) {
+    public SpaceType(String type, List<String> allowedDurations, Location location) {
         this.type = type;
         this.allowedDurations = allowedDurations;
+        this.location = location;
     }
 }

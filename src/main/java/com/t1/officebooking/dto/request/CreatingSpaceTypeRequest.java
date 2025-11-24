@@ -12,6 +12,9 @@ public class CreatingSpaceTypeRequest {
     private String type;
 
     @NotNull
+    Long locationId;
+
+    @NotNull
     private List<String> allowedDurations;
 }
 

@@ -72,4 +72,8 @@ public class LocationService {
             throw new AdminAuthorityAbusingException("Location does not belong to your organization");
         }
     }
+
+    public Location getReference(Long locationId) {
+        return locationRepository.getReferenceById(locationId);
+    }
 }

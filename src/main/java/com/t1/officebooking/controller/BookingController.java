@@ -31,11 +31,6 @@ public class BookingController {
     private final BookingService bookingService;
     private final SpaceMapperFunction spaceMapper;
 
-    @GetMapping("/types")
-    public ResponseEntity<List<SpaceType>> getAllSpaceTypes() {
-        return ResponseEntity.ok().body(spaceService.getAllSpaceTypes());
-    }
-
     @PostMapping("/space-filter")
     public ResponseEntity<List<SpaceResponse>> getSpacesFilteredByTypeAndLocation(
             @RequestBody @Valid FilteringSpacesRequest request) {

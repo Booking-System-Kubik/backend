@@ -52,9 +52,12 @@ public class SpaceService {
 
     @Transactional
     public SpaceType addSpaceType(CreatingSpaceTypeRequest request) {
+        Location location = locationService.findById(request.getLocationId());
+
         SpaceType spaceType = new SpaceType(
                 request.getType(),
-                request.getAllowedDurations()
+                request.getAllowedDurations(),
+                location
         );
 
         if (spaceTypeExists(spaceType))
@@ -62,8 +65,9 @@ public class SpaceService {
         return spaceTypeRepository.save(spaceType);
     }
 
-    public List<SpaceType> getAllSpaceTypes() {
-        return spaceTypeRepository.findAll();
+    public List<SpaceType> getAllSpaceTypes(Long locationId) {
+        return spaceTypeRepository.findByLocation(
+                locationService.getReference(locationId));
     }
 
     public boolean spaceTypeExists(SpaceType spaceType) {

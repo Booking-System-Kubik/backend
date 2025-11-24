@@ -4,6 +4,7 @@ import com.t1.officebooking.dto.response.FloorSpacesResponse;
 import com.t1.officebooking.dto.response.SpaceResponse;
 import com.t1.officebooking.model.Location;
 import com.t1.officebooking.model.Organization;
+import com.t1.officebooking.model.SpaceType;
 import com.t1.officebooking.service.LocationService;
 import com.t1.officebooking.service.OrganizationService;
 import com.t1.officebooking.service.SpaceService;
@@ -66,5 +67,12 @@ public class PreRegistrationController {
                         .spaces(spaces)
                         .build()
         );
+    }
+
+    @GetMapping("/locations/{locationId}/spacetypes")
+    public ResponseEntity<List<SpaceType>> getAllSpaceTypes(
+            @PathVariable Long locationId
+    ) {
+        return ResponseEntity.ok().body(spaceService.getAllSpaceTypes(locationId));
     }
 }
