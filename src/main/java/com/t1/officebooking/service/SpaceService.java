@@ -51,7 +51,7 @@ public class SpaceService {
     }
 
     @Transactional
-    public SpaceType addSpaceType(CreatingSpaceTypeRequest request) {
+    public void addSpaceType(CreatingSpaceTypeRequest request) {
         Location location = locationService.findById(request.getLocationId());
 
         SpaceType spaceType = new SpaceType(

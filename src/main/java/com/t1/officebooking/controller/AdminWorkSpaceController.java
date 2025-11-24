@@ -61,10 +61,10 @@ public class AdminWorkSpaceController {
     }
 
     @PostMapping("/create-spacetype")
-    public ResponseEntity<SpaceType> createSpaceType(
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createSpaceType(
             @RequestBody @Valid CreatingSpaceTypeRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(spaceService.addSpaceType(request));
+        spaceService.addSpaceType(request);
     }
 
     @PostMapping("/create-floor-spaces")
